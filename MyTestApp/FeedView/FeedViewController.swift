@@ -9,6 +9,8 @@ final class FeedViewController: UIViewController {
     private var collectionView: UICollectionView!
     private var posts: [FeedPosts] = []
     private let networkService: NetworkService = NetworkServiceImpl()
+    var onPostSelected: ((Int) -> Void)?
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,7 +57,6 @@ final class FeedViewController: UIViewController {
             catch {
                 await MainActor.run {
                     print("❌", error)
-                    // можна показати алерт
                 }
             }
         }
@@ -86,5 +87,11 @@ extension FeedViewController: UICollectionViewDelegateFlowLayout {
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
         CGSize(width: collectionView.bounds.width - 32, height: 180)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let post = posts[indexPath.item]
+        onPostSelected?(post.postId)
+        print("selected")
     }
 }

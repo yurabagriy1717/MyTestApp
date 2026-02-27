@@ -5,7 +5,7 @@
 import Foundation
 
 struct DetailPostModel: Decodable {
-    let posts: [DetailPosts]
+    let post: DetailPosts
 }
 
 struct DetailPosts: Decodable {

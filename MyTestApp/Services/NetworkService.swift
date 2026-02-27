@@ -42,10 +42,7 @@ final class NetworkServiceImpl: NetworkService {
                 throw URLError(.badServerResponse)
             }
             let model = try JSONDecoder().decode(DetailPostModel.self, from: data)
-            guard let post = model.posts.first else {
-                throw URLError(.badServerResponse)
-            }
-            return post
+            return model.post
         } catch {
             print("❌ Network error:", error)
             throw error

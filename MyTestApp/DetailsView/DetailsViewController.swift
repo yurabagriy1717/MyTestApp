@@ -24,6 +24,7 @@ final class DetailsViewController: UIViewController {
         view.backgroundColor = .systemBackground
         title = "Feed"
         setupCollectionView()
+        loadDetails()
     }
     
     private func setupCollectionView() {
@@ -87,12 +88,11 @@ extension DetailsViewController: UICollectionViewDataSource {
     
 }
 
-
 extension DetailsViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        CGSize(width: collectionView.bounds.width - 32, height: 500)
+        CGSize(width: collectionView.bounds.width - 32, height: 1000)
     }
 }
 

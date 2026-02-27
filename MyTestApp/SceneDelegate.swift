@@ -5,6 +5,7 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
+    var coordinator: AppCoordinator?
     
     
     func scene(_ scene: UIScene,
@@ -14,11 +15,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
         let window = UIWindow(windowScene: windowScene)
+        let navigationController = UINavigationController()
+        
+        let coordinator = AppCoordinator(navigationController: navigationController)
+        self.coordinator = coordinator
+        coordinator.start()
 
-        let feedVC = FeedViewController()
-        let nav = UINavigationController(rootViewController: feedVC)
-
-        window.rootViewController = nav
+        window.rootViewController = navigationController
         self.window = window
         window.makeKeyAndVisible()
     }
