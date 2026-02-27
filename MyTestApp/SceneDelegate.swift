@@ -15,7 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let window = UIWindow(windowScene: windowScene)
 
-        let feedVC = FeedViewController()
+        let feedVC = DetailsViewController()
         let nav = UINavigationController(rootViewController: feedVC)
 
         window.rootViewController = nav
