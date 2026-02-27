@@ -7,16 +7,8 @@ import UIKit
 final class FeedViewController: UIViewController {
     
     private var collectionView: UICollectionView!
-    private var posts: [FeedPosts] = [
-        FeedPosts(postId: 111, timeshamp: 111, title: "fevfdvcdгguireucsyhс", preview_text: "erfeferfghfykerkufesfcuysegfesruhifckigvhgdfrufigsedhfcuygvbhrsdfcjsdhbvcrjhsgcfygbrsfcujvybhdrfnkuvchrscuirc", likes_count: 123),
-        FeedPosts(postId: 111, timeshamp: 111, title: "fevfdvcd", preview_text: "erfeferf", likes_count: 123),
-        FeedPosts(postId: 111, timeshamp: 111, title: "fevfdvcd", preview_text: "erfeferf", likes_count: 123),
-        FeedPosts(postId: 111, timeshamp: 111, title: "fevfdvcd", preview_text: "erfeferf", likes_count: 123),
-        FeedPosts(postId: 111, timeshamp: 111, title: "fevfdvcd", preview_text: "erfeferf", likes_count: 123),
-        FeedPosts(postId: 111, timeshamp: 111, title: "fevfdvcd", preview_text: "erfeferf", likes_count: 123),
-        FeedPosts(postId: 111, timeshamp: 111, title: "fevfdvcd", preview_text: "erfeferf", likes_count: 123),
-        FeedPosts(postId: 111, timeshamp: 111, title: "fevfdvcd", preview_text: "erfeferf", likes_count: 123)
-    ]
+    private var posts: [FeedPosts] = []
+    private let networkService: NetworkService = NetworkServiceImpl()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,6 +16,7 @@ final class FeedViewController: UIViewController {
         title = "Feed"
         
         setupCollectionView()
+        loadFeed()
     }
     
     private func setupCollectionView() {
@@ -32,12 +25,12 @@ final class FeedViewController: UIViewController {
         layout.scrollDirection = .vertical
         layout.minimumLineSpacing = 16
         layout.sectionInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
-
+        
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .white
         collectionView.register(PostCell.self, forCellWithReuseIdentifier: PostCell.reuseId)
-
+        
         collectionView.dataSource = self
         collectionView.delegate = self
         
@@ -48,6 +41,24 @@ final class FeedViewController: UIViewController {
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+    }
+    
+    private func loadFeed() {
+        Task {
+            do {
+                let loaded = try await networkService.getFeedNews()
+                await MainActor.run {
+                    self.posts = loaded
+                    self.collectionView.reloadData()
+                }
+            }
+            catch {
+                await MainActor.run {
+                    print("❌", error)
+                    // можна показати алерт
+                }
+            }
+        }
     }
 }
 
