@@ -7,10 +7,9 @@ import UIKit
 final class FeedViewController: UIViewController {
     
     private var collectionView: UICollectionView!
-    private var posts: [FeedPosts] = []
-    private let networkService: NetworkService = NetworkServiceImpl()
     var onPostSelected: ((Int) -> Void)?
-
+    private let vm = FeedViewModel()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -18,7 +17,8 @@ final class FeedViewController: UIViewController {
         title = "Feed"
         
         setupCollectionView()
-        loadFeed()
+        bindViewModel()
+        vm.loadFeed()
     }
     
     private func setupCollectionView() {
@@ -45,28 +45,28 @@ final class FeedViewController: UIViewController {
         ])
     }
     
-    private func loadFeed() {
-        Task {
-            do {
-                let loaded = try await networkService.getFeedNews()
-                await MainActor.run {
-                    self.posts = loaded
-                    self.collectionView.reloadData()
-                }
-            }
-            catch {
-                await MainActor.run {
-                    print("❌", error)
-                }
-            }
+    private func bindViewModel() {
+        vm.onPostUpdated = { [weak self] in
+            self?.collectionView.reloadData()
         }
+        
+        vm.onLoadingChanged = { isLoading in
+            
+        }
+        
+        vm.onError = { error in
+            print("❌", error)
+        }
+        
+        
     }
 }
 
 
+
 extension FeedViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        posts.count
+        vm.numberOfItems()
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -74,7 +74,7 @@ extension FeedViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         
-        let post = posts[indexPath.item]
+        let post = vm.post(at: indexPath.item)
         cell.configure(with: post)
         return cell
     }
@@ -90,7 +90,7 @@ extension FeedViewController: UICollectionViewDelegateFlowLayout {
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let post = posts[indexPath.item]
+        let post = vm.post(at: indexPath.item)
         onPostSelected?(post.postId)
         print("selected")
     }

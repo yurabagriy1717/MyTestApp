@@ -6,14 +6,12 @@ import UIKit
 
 final class DetailsViewController: UIViewController {
     private var collectionView: UICollectionView!
-    private var post: DetailPosts?
-    private var postId: Int
-    private let networkService: NetworkService = NetworkServiceImpl()
+    private let vm: DetailsViewModel
     
     init(postId: Int) {
-        self.postId = postId
-        super.init(nibName: nil, bundle: nil)
-    }
+            self.vm = DetailsViewModel(postId: postId)
+            super.init(nibName: nil, bundle: nil)
+        }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -24,7 +22,8 @@ final class DetailsViewController: UIViewController {
         view.backgroundColor = .systemBackground
         title = "Feed"
         setupCollectionView()
-        loadDetails()
+        bindViewModel()
+        vm.loadDetails()
     }
     
     private func setupCollectionView() {
@@ -50,21 +49,17 @@ final class DetailsViewController: UIViewController {
         ])
     }
     
-    private func loadDetails() {
-        Task {
-            do {
-                let loaded = try await networkService.getDetailNews(id: postId)
-                await MainActor.run {
-                    self.post = loaded
-                    self.collectionView.reloadData()
-                }
-            }
-            catch {
-                await MainActor.run {
-                    print("❌", error)
-                    // можна показати алерт
-                }
-            }
+    private func bindViewModel() {
+        vm.onPostUpdated = { [weak self] in
+            self?.collectionView.reloadData()
+        }
+
+        vm.onLoadingChanged = { isLoading in
+            
+        }
+
+        vm.onError = { error in
+            print("❌", error)
         }
     }
 }
@@ -72,7 +67,7 @@ final class DetailsViewController: UIViewController {
 
 extension DetailsViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return post == nil ? 0 : 1
+        return vm.hasPost() ? 1 : 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -80,7 +75,7 @@ extension DetailsViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         
-        guard let post = post else { return UICollectionViewCell() }
+        guard let post = vm.posts else { return UICollectionViewCell() }
         cell.configure(with: post)
         return cell
     }
