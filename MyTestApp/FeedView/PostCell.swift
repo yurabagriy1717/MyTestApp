@@ -88,7 +88,7 @@ final class PostCell: UICollectionViewCell {
         titleLabel.text = item.title
         previewLabel.text = item.preview_text
         likesLabel.text = "\(item.likes_count)"
-        dateLabel.text = "21 days ago"
+        dateLabel.text = item.timeshamp.timeAgoString
     }
     
 }

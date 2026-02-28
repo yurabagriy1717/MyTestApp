@@ -99,7 +99,7 @@ final class DetailPostCell: UICollectionViewCell {
         titleLabel.text = item.title
         descriptionLabel.text = item.text
         likesLabel.text = "❤️ \(item.likes_count)"
-        dateLabel.text = "21 days ago"
+        dateLabel.text = item.timeshamp.timeAgoString
         
         postImageView.image = nil
         Task {
