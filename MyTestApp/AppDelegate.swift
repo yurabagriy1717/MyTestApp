@@ -1,8 +1,5 @@
 //
 //  AppDelegate.swift
-//  MyTestApp
-//
-//  Created by Юрій Багрій on 26.02.2026.
 //
 
 import UIKit
