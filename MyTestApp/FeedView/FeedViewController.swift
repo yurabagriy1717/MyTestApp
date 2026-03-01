@@ -9,8 +9,7 @@ final class FeedViewController: UIViewController {
     private var collectionView: UICollectionView!
     var onPostSelected: ((Int) -> Void)?
     private let vm = FeedViewModel()
-    
-    
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
@@ -21,18 +20,39 @@ final class FeedViewController: UIViewController {
         vm.loadFeed()
     }
     
+    private func createLayout() -> UICollectionViewCompositionalLayout {
+        
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .estimated(150)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .estimated(150)
+        )
+        let group = NSCollectionLayoutGroup.vertical(
+            layoutSize: groupSize,
+            subitems: [item]
+        )
+        
+        let section = NSCollectionLayoutSection(group: group)
+        section.interGroupSpacing = 1
+        section.contentInsets = NSDirectionalEdgeInsets(
+            top: 0,
+            leading: 0,
+            bottom: 0,
+            trailing: 0
+        )
+        
+        return UICollectionViewCompositionalLayout(section: section)
+    }
+        
     private func setupCollectionView() {
-        
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .vertical
-        layout.minimumLineSpacing = 16
-        layout.sectionInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
-        
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.backgroundColor = .white
+        collectionView.backgroundColor = .systemBackground
         collectionView.register(PostCell.self, forCellWithReuseIdentifier: PostCell.reuseId)
-        
         collectionView.dataSource = self
         collectionView.delegate = self
         
@@ -57,41 +77,43 @@ final class FeedViewController: UIViewController {
         vm.onError = { error in
             print("❌", error)
         }
-        
-        
     }
 }
 
-
-
 extension FeedViewController: UICollectionViewDataSource {
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         vm.numberOfItems()
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PostCell.reuseId, for: indexPath) as? PostCell else {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: PostCell.reuseId,
+            for: indexPath
+        ) as? PostCell else {
             return UICollectionViewCell()
         }
         
         let post = vm.post(at: indexPath.item)
-        cell.configure(with: post)
+        let contentWidth = collectionView.bounds.width - 32
+        
+        cell.configure(
+            with: post,
+            isExpanded: vm.isExpanded(postId: post.postId),
+            contentWidth: contentWidth,
+            onExpandTapped: { [weak self] in
+                self?.vm.toggleExpanded(postId: post.postId)
+            }
+        )
         return cell
     }
-    
-    
 }
 
-extension FeedViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        sizeForItemAt indexPath: IndexPath) -> CGSize {
-        CGSize(width: collectionView.bounds.width - 32, height: 180)
-    }
+
+extension FeedViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let post = vm.post(at: indexPath.item)
         onPostSelected?(post.postId)
-        print("selected")
     }
 }

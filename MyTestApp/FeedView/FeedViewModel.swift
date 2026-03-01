@@ -9,12 +9,27 @@ final class FeedViewModel {
     var onPostUpdated: (() -> Void)?
     var onLoadingChanged: ((Bool) -> Void)?
     var onError: ((Error) -> Void)?
+    private var expandedPostIds: Set<Int> = []
+
     
     private var networkService: NetworkService = NetworkServiceImpl()
     private(set) var posts: [FeedPosts] = []
     
     init(networkService: NetworkService = NetworkServiceImpl()) {
         self.networkService = networkService
+    }
+    
+    func isExpanded(postId: Int) -> Bool {
+        expandedPostIds.contains(postId)
+    }
+    
+    func toggleExpanded(postId: Int) {
+        if expandedPostIds.contains(postId) {
+            expandedPostIds.remove(postId)
+        } else {
+            expandedPostIds.insert(postId)
+        }
+        onPostUpdated?()
     }
     
     func loadFeed() {
