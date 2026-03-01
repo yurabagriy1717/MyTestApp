@@ -66,8 +66,14 @@ final class FeedViewController: UIViewController {
     }
     
     private func bindViewModel() {
-        vm.onPostUpdated = { [weak self] in
-            self?.collectionView.reloadData()
+        vm.onPostUpdated = { [weak self] indexPath in
+            guard let self else { return }
+
+            if let indexPath {
+                self.collectionView.reloadItems(at: [indexPath])
+            } else {
+                self.collectionView.reloadData()
+            }
         }
         
         vm.onLoadingChanged = { isLoading in

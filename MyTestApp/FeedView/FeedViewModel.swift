@@ -6,7 +6,7 @@ import Foundation
 
 final class FeedViewModel {
     
-    var onPostUpdated: (() -> Void)?
+    var onPostUpdated: ((IndexPath?) -> Void)?
     var onLoadingChanged: ((Bool) -> Void)?
     var onError: ((Error) -> Void)?
     private var expandedPostIds: Set<Int> = []
@@ -29,7 +29,9 @@ final class FeedViewModel {
         } else {
             expandedPostIds.insert(postId)
         }
-        onPostUpdated?()
+        if let index = posts.firstIndex(where: { $0.postId == postId }) {
+            onPostUpdated?(IndexPath(item: index, section: 0))
+        }
     }
     
     func loadFeed() {
@@ -39,7 +41,7 @@ final class FeedViewModel {
                 let loaded = try await networkService.getFeedNews()
                 await MainActor.run {
                     self.posts = loaded
-                    self.onPostUpdated?()
+                    self.onPostUpdated?(nil)
                     self.onLoadingChanged?(false)
                 }
             }

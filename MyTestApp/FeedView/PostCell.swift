@@ -1,5 +1,5 @@
 //
-//PostCell.swift
+// PostCell.swift
 //
 
 import UIKit
@@ -26,6 +26,17 @@ final class PostCell: UICollectionViewCell {
     
     required init?(coder: NSCoder) { fatalError() }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        titleLabel.text = nil
+        previewLabel.text = nil
+        likesLabel.text = nil
+        dateLabel.text = nil
+        previewLabel.numberOfLines = 2
+        buttonContainer.isHidden = true
+        onExpandTapped = nil
+    }
+    
     private func setupUI() {
         contentView.backgroundColor = .systemBackground
         
@@ -44,7 +55,7 @@ final class PostCell: UICollectionViewCell {
         dateLabel.textColor = .secondaryLabel
         dateLabel.textAlignment = .right
         
-        button.setTitle("Розгорнути", for: .normal)
+        button.setTitle("Expand", for: .normal)
         button.layer.cornerRadius = 10
         button.addTarget(self, action: #selector(onTapped), for: .touchUpInside)
         button.backgroundColor = .systemGray2
@@ -118,7 +129,7 @@ final class PostCell: UICollectionViewCell {
             buttonContainer.isHidden = false
             previewLabel.numberOfLines = isExpanded ? 0 : 2
             previewLabel.lineBreakMode = .byTruncatingTail
-            button.setTitle(isExpanded ? "Згорнути" : "Розгорнути", for: .normal)
+            button.setTitle(isExpanded ? "Collapse" : "Expand", for: .normal)
         } else {
             buttonContainer.isHidden = true
             previewLabel.numberOfLines = 0
