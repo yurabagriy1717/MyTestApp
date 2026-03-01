@@ -27,13 +27,11 @@ final class DetailPostCell: UICollectionViewCell {
     private func setupUI() {
         contentView.backgroundColor = .systemBackground
         
-        // Image
         postImageView.translatesAutoresizingMaskIntoConstraints = false
         postImageView.backgroundColor = .systemGray5
         postImageView.contentMode = .scaleAspectFill
         postImageView.clipsToBounds = true
         
-        // Labels
         titleLabel.font = .systemFont(ofSize: 22, weight: .semibold)
         titleLabel.numberOfLines = 0
         
@@ -48,7 +46,6 @@ final class DetailPostCell: UICollectionViewCell {
         dateLabel.textColor = .secondaryLabel
         dateLabel.textAlignment = .right
         
-        // Meta row
         metaRow.axis = .horizontal
         metaRow.alignment = .center
         metaRow.spacing = 8
@@ -56,7 +53,6 @@ final class DetailPostCell: UICollectionViewCell {
         metaRow.addArrangedSubview(UIView())
         metaRow.addArrangedSubview(dateLabel)
         
-        // Text stack
         textStack.axis = .vertical
         textStack.alignment = .fill
         textStack.spacing = 10
@@ -65,28 +61,23 @@ final class DetailPostCell: UICollectionViewCell {
         textStack.addArrangedSubview(descriptionLabel)
         textStack.addArrangedSubview(metaRow)
         
-        // Text container (to keep 16pt padding only for text, not for image)
         textContainer.translatesAutoresizingMaskIntoConstraints = false
         textContainer.addSubview(textStack)
         
-        // Add views
         contentView.addSubview(postImageView)
         contentView.addSubview(textContainer)
         
         NSLayoutConstraint.activate([
-            // Image full width
             postImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
             postImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             postImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             postImageView.heightAnchor.constraint(equalToConstant: 320),
             
-            // Text container under image
             textContainer.topAnchor.constraint(equalTo: postImageView.bottomAnchor),
             textContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             textContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             textContainer.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             
-            // Inner padding 16
             textStack.topAnchor.constraint(equalTo: textContainer.topAnchor, constant: 16),
             textStack.leadingAnchor.constraint(equalTo: textContainer.leadingAnchor, constant: 16),
             textStack.trailingAnchor.constraint(equalTo: textContainer.trailingAnchor, constant: -16),
