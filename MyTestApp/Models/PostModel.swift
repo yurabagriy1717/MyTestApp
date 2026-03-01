@@ -8,7 +8,7 @@ struct PostModel: Decodable {
     let posts: [FeedPosts]
 }
 
-struct FeedPosts: Decodable {
+struct FeedPosts: Decodable, Hashable {
     let postId: Int
     let timeshamp: Int
     let title: String

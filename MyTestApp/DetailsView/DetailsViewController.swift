@@ -8,8 +8,8 @@ final class DetailsViewController: UIViewController {
     private var collectionView: UICollectionView!
     private let vm: DetailsViewModel
     
-    init(postId: Int) {
-        self.vm = DetailsViewModel(postId: postId)
+    init(viewModel: DetailsViewModel) {
+        self.vm = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -27,18 +27,12 @@ final class DetailsViewController: UIViewController {
     }
     
     private func setupCollectionView() {
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .vertical
-        layout.minimumLineSpacing = 16
-        layout.sectionInset = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
-        
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .white
         collectionView.register(DetailPostCell.self, forCellWithReuseIdentifier: DetailPostCell.reuseId)
         
         collectionView.dataSource = self
-//        collectionView.delegate = self
         
         view.addSubview(collectionView)
         NSLayoutConstraint.activate([
@@ -99,12 +93,3 @@ extension DetailsViewController: UICollectionViewDataSource {
     
     
 }
-//
-//extension DetailsViewController: UICollectionViewDelegateFlowLayout {
-//    func collectionView(_ collectionView: UICollectionView,
-//                        layout collectionViewLayout: UICollectionViewLayout,
-//                        sizeForItemAt indexPath: IndexPath) -> CGSize {
-//        CGSize(width: collectionView.bounds.width - 32, height: 1000)
-//    }
-//}
-

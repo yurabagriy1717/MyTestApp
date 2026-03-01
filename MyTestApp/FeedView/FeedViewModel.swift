@@ -6,16 +6,16 @@ import Foundation
 
 final class FeedViewModel {
     
-    var onPostUpdated: ((IndexPath?) -> Void)?
+    var onPostUpdated: (() -> Void)?
     var onLoadingChanged: ((Bool) -> Void)?
     var onError: ((Error) -> Void)?
     private var expandedPostIds: Set<Int> = []
 
     
-    private var networkService: NetworkService = NetworkServiceImpl()
+    private var networkService: NetworkService
     private(set) var posts: [FeedPosts] = []
     
-    init(networkService: NetworkService = NetworkServiceImpl()) {
+    init(networkService: NetworkService) {
         self.networkService = networkService
     }
     
@@ -29,9 +29,7 @@ final class FeedViewModel {
         } else {
             expandedPostIds.insert(postId)
         }
-        if let index = posts.firstIndex(where: { $0.postId == postId }) {
-            onPostUpdated?(IndexPath(item: index, section: 0))
-        }
+        onPostUpdated?()
     }
     
     func loadFeed() {
@@ -41,7 +39,7 @@ final class FeedViewModel {
                 let loaded = try await networkService.getFeedNews()
                 await MainActor.run {
                     self.posts = loaded
-                    self.onPostUpdated?(nil)
+                    self.onPostUpdated?()
                     self.onLoadingChanged?(false)
                 }
             }
@@ -59,5 +57,11 @@ final class FeedViewModel {
     
     func post(at index: Int) -> FeedPosts {
         posts[index]
+    }
+    
+    func makePostsItem() -> [PostItemModel] {
+        posts.map { post in
+            PostItemModel(posts: post, isExpanded: expandedPostIds.contains(post.postId))
+        }
     }
 }

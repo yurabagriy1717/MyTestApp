@@ -10,11 +10,11 @@ final class DetailsViewModel {
     var onLoadingChanged: ((Bool) -> Void)?
     var onError: ((Error) -> Void)?
     
-    private var networkService: NetworkService = NetworkServiceImpl()
+    private let networkService: NetworkService
     private(set) var posts: DetailPosts?
     private let postId: Int
     
-    init(postId: Int,networkService: NetworkService = NetworkServiceImpl()) {
+    init(postId: Int,networkService: NetworkService) {
         self.networkService = networkService
         self.postId = postId
     }

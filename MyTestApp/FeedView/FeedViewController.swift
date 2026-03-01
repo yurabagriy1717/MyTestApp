@@ -8,14 +8,25 @@ final class FeedViewController: UIViewController {
     
     private var collectionView: UICollectionView!
     var onPostSelected: ((Int) -> Void)?
-    private let vm = FeedViewModel()
-        
+    private let vm: FeedViewModel
+    private var dataSource: UICollectionViewDiffableDataSource<FeedSection, PostItemModel>!
+    
+    init(viewModel: FeedViewModel) {
+        self.vm = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         title = "Feed"
         
         setupCollectionView()
+        setupDataSource()
         bindViewModel()
         vm.loadFeed()
     }
@@ -47,13 +58,12 @@ final class FeedViewController: UIViewController {
         
         return UICollectionViewCompositionalLayout(section: section)
     }
-        
+    
     private func setupCollectionView() {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .systemBackground
         collectionView.register(PostCell.self, forCellWithReuseIdentifier: PostCell.reuseId)
-        collectionView.dataSource = self
         collectionView.delegate = self
         
         view.addSubview(collectionView)
@@ -65,15 +75,36 @@ final class FeedViewController: UIViewController {
         ])
     }
     
+    private func setupDataSource() {
+        dataSource = UICollectionViewDiffableDataSource(collectionView: collectionView) {
+            [weak self] collectionView, IndexPath, item in
+            guard let self,
+                  let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PostCell.reuseId, for: IndexPath) as? PostCell else {
+                      return UICollectionViewCell()
+                  }
+            let contentWidth = collectionView.bounds.width - 32
+            cell.configure(
+                with: item.posts,
+                isExpanded: item.isExpanded,
+                contentWidth: contentWidth,
+                onExpandTapped: { [weak self] in
+                    self?.vm.toggleExpanded(postId: item.posts.postId)
+                }
+            )
+            return cell
+        }
+    }
+    
+    private func applySnapShot() {
+        var snapShot = NSDiffableDataSourceSnapshot<FeedSection, PostItemModel>()
+        snapShot.appendSections([.main])
+        snapShot.appendItems(vm.makePostsItem())
+        dataSource.apply(snapShot, animatingDifferences: true)
+    }
+    
     private func bindViewModel() {
-        vm.onPostUpdated = { [weak self] indexPath in
-            guard let self else { return }
-
-            if let indexPath {
-                self.collectionView.reloadItems(at: [indexPath])
-            } else {
-                self.collectionView.reloadData()
-            }
+        vm.onPostUpdated = { [weak self]  in
+            self?.applySnapShot()
         }
         
         vm.onLoadingChanged = { isLoading in
@@ -86,40 +117,18 @@ final class FeedViewController: UIViewController {
     }
 }
 
-extension FeedViewController: UICollectionViewDataSource {
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        vm.numberOfItems()
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: PostCell.reuseId,
-            for: indexPath
-        ) as? PostCell else {
-            return UICollectionViewCell()
-        }
-        
-        let post = vm.post(at: indexPath.item)
-        let contentWidth = collectionView.bounds.width - 32
-        
-        cell.configure(
-            with: post,
-            isExpanded: vm.isExpanded(postId: post.postId),
-            contentWidth: contentWidth,
-            onExpandTapped: { [weak self] in
-                self?.vm.toggleExpanded(postId: post.postId)
-            }
-        )
-        return cell
-    }
-}
-
 
 extension FeedViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let post = vm.post(at: indexPath.item)
-        onPostSelected?(post.postId)
+        guard let item = dataSource.itemIdentifier(for: indexPath) else {
+            return
+        }
+        onPostSelected?(item.posts.postId)
     }
+}
+
+
+enum FeedSection {
+    case main
 }

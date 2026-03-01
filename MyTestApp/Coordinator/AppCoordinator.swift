@@ -11,10 +11,12 @@ protocol Coordinator {
 
 
 final class AppCoordinator: Coordinator {
+    private let container: DIContainer
     let navigationController: UINavigationController
     
-    init(navigationController: UINavigationController) {
+    init(navigationController: UINavigationController, container: DIContainer) {
         self.navigationController = navigationController
+        self.container = container
     }
     
     func start() {
@@ -22,7 +24,7 @@ final class AppCoordinator: Coordinator {
     }
     
     func showFeed() {
-        let feedVC = FeedViewController()
+        let feedVC = container.makeFeedViewController()
         feedVC.onPostSelected = { [weak self] postId in
             self?.showDetails(postId: postId)
         }
@@ -30,7 +32,7 @@ final class AppCoordinator: Coordinator {
     }
     
     func showDetails(postId: Int) {
-        let detailsVC = DetailsViewController(postId: postId)
+        let detailsVC = container.makeDetailsViewController(postId: postId)
         navigationController.pushViewController(detailsVC, animated: true)
     }
     
